@@ -89,7 +89,7 @@ increase_infection_level(City, Disease, Originator)
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec(get_infection_levels(City :: city()) -> {ok, {city(), infection_levels()}}).
+-spec(get_infection_levels(City :: city()) -> {ok, {city(), infection_levels, infection_levels()}}).
 get_infection_levels(City)
   when ?is_city(City) ->
   gen_server:call(City, {get_infection_levels, City}).
@@ -100,7 +100,7 @@ get_infection_levels(City)
 %%
 %% @end
 %%--------------------------------------------------------------------
--spec(get_links(City :: city()) -> {ok, {city(), infection_levels()}}).
+-spec(get_links(City :: city()) -> {ok, {city(), links, links()}}).
 get_links(City)
   when ?is_city(City) ->
   gen_server:call(City, {get_links, City}).
@@ -114,17 +114,9 @@ get_links(City)
 %% @doc
 %% Initializes the server
 %%
-%% @spec init(Args) -> {ok, State} |
-%%                     {ok, State, Timeout} |
-%%                     ignore |
-%%                     {stop, Reason}
 %% @end
 %%--------------------------------------------------------------------
--spec(init(Args :: term()) ->
-  {ok, State :: #state{}}
-  | {ok, State :: #state{}, timeout() | hibernate}
-  | {stop, Reason :: term()}
-  | ignore).
+-spec(init([city(), ...]) -> {ok, State :: #state{}}).
 init([City, Links]) ->
   {ok, #state{name = City, links = Links}}.
 
@@ -137,12 +129,7 @@ init([City, Links]) ->
 %%--------------------------------------------------------------------
 -spec(handle_call(Request :: term(), From :: {pid(), Tag :: term()},
     State :: #state{}) ->
-  {reply, Reply :: term(), NewState :: #state{}}
-  |{reply, Reply :: term(), NewState :: #state{}, timeout()| hibernate}
-  |{noreply, NewState :: #state{}}
-  |{noreply, NewState :: #state{}, timeout() | hibernate}
-  |{stop, Reason :: term(), Reply :: term(), NewState :: #state{}}
-  |{stop, Reason :: term(), NewState :: #state{}}).
+  {reply, Reply :: term(), NewState :: #state{}}).
 
 handle_call({get_infection_levels, City}, _From, State) ->
   #state{name = City,
@@ -166,9 +153,7 @@ handle_call(_Request, _From, State) ->
 %% @end
 %%--------------------------------------------------------------------
 -spec(handle_cast(Request :: term(), State :: #state{}) ->
-  {noreply, NewState :: #state{}} |
-  {noreply, NewState :: #state{}, timeout() | hibernate} |
-  {stop, Reason :: term(), NewState :: #state{}}).
+  {noreply, NewState :: #state{}}).
 
 handle_cast({increase_infection_level, City, Disease, Originator, Ref}, State) ->
   #state{name = City,
@@ -200,15 +185,11 @@ handle_cast(_Request, State) ->
 %% @doc
 %% Handling all non call/cast messages
 %%
-%% @spec handle_info(Info, State) -> {noreply, State} |
-%%                                   {noreply, State, Timeout} |
-%%                                   {stop, Reason, State}
+%% @spec handle_info(Info, State) -> {noreply, State}
 %% @end
 %%--------------------------------------------------------------------
 -spec(handle_info(Info :: timeout() | term(), State :: #state{}) ->
-  {noreply, NewState :: #state{}} |
-  {noreply, NewState :: #state{}, timeout() | hibernate} |
-  {stop, Reason :: term(), NewState :: #state{}}).
+  {noreply, NewState :: #state{}}).
 handle_info(_Info, State) ->
   {noreply, State}.
 
@@ -238,7 +219,7 @@ terminate(_Reason, _State) ->
 %%--------------------------------------------------------------------
 -spec(code_change(OldVsn :: term() | {down, term()}, State :: #state{},
     Extra :: term()) ->
-  {ok, NewState :: #state{}} | {error, Reason :: term()}).
+  {ok, NewState :: #state{}}).
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 

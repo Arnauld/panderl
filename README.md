@@ -15,7 +15,7 @@ $ rebar doc
 ## Execute dializer
 
 ```
-$ make dializer
+$ make clean compile dialyzer
 ```
 
 It may take some times the first time. 
