@@ -34,11 +34,11 @@ should_not_be_infected_by_default__test() ->
 should_asynchronously_be_notified_with_new_infection_level_when_it_increases_test() ->
   try
     city_srv:start_link(london, [paris, new_york]),
-    Ref1 = city_srv:increase_infection_level(london, blue, self()),
-    Ref2 = city_srv:increase_infection_level(london, blue, self()),
-    Ref3 = city_srv:increase_infection_level(london, red, self()),
-    Ref4 = city_srv:increase_infection_level(london, yellow, self()),
-    Ref5 = city_srv:increase_infection_level(london, blue, self()),
+    {ok, Ref1} = city_srv:increase_infection_level(london, blue, self()),
+    {ok, Ref2} = city_srv:increase_infection_level(london, blue, self()),
+    {ok, Ref3} = city_srv:increase_infection_level(london, red, self()),
+    {ok, Ref4} = city_srv:increase_infection_level(london, yellow, self()),
+    {ok, Ref5} = city_srv:increase_infection_level(london, blue, self()),
     Levels = lists:map(fun(Ref) ->
       receive
         {infection_level_increased, london, Ref, Disease, NewLevel} ->
@@ -70,10 +70,10 @@ should_increase_infection_levels_and_then_get_corresponding_infection_levels__te
 should_asynchronously_be_notified_on_outbreak_test() ->
   try
     city_srv:start_link(london, [paris, new_york]),
-    _Ref1 = city_srv:increase_infection_level(london, blue, self()),
-    _Ref2 = city_srv:increase_infection_level(london, blue, self()),
-    _Ref3 = city_srv:increase_infection_level(london, blue, self()),
-    Ref4 = city_srv:increase_infection_level(london, blue, self()),
+    {ok, _Ref1} = city_srv:increase_infection_level(london, blue, self()),
+    {ok, _Ref2} = city_srv:increase_infection_level(london, blue, self()),
+    {ok, _Ref3} = city_srv:increase_infection_level(london, blue, self()),
+    {ok, Ref4} = city_srv:increase_infection_level(london, blue, self()),
     %
     % selective receive, only care of the last Ref
     %

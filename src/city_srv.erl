@@ -81,7 +81,7 @@ increase_infection_level(City, Disease, Originator)
   andalso ?is_originator(Originator) ->
   Ref = make_ref(),
   gen_server:cast(City, {increase_infection_level, City, Disease, Originator, Ref}),
-  Ref.
+  {ok, Ref}.
 
 %%--------------------------------------------------------------------
 %% @doc
