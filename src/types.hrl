@@ -11,6 +11,7 @@
 -type city() :: atom().
 -type disease() :: blue|yellow|black|red.
 -type links() :: [city()].
+-type city_def() :: {city(), links()}.
 
 -type infection_level() :: 0|1|2|3.
 -type infection_result() :: infection_level()|outbreak.

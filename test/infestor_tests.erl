@@ -79,6 +79,7 @@ should_infect_and_chain_outbreak__test() ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+
 get_infection_level(City, Disease) ->
   {ok, {City, infection_levels, Levels}} = city_srv:get_infection_levels(City),
   proplists:get_value(Disease, Levels).
