@@ -37,7 +37,3 @@ default_cyclic_linked_cities() ->
 get_links(City) ->
   {ok, {City, links, Links}} = city_srv:get_links(City),
   Links.
-
-get_infection_level(City, Disease) ->
-  {ok, {City, infection_levels, Levels}} = city_srv:get_infection_levels(City),
-  proplists:get_value(Disease, Levels).
