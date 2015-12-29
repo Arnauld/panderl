@@ -17,7 +17,6 @@ should_start_cities__test() ->
   try
     city_sup:start_link(CityDefs),
 
-    ?assertEqual(0, get_infection_level(london, blue)),
     ?assertEqual([paris, madrid], get_links(london)),
     ?assertEqual([london, madrid], get_links(paris)),
     ?assertEqual([paris, london], get_links(madrid))
