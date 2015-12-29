@@ -55,7 +55,7 @@ stop() ->
 %%--------------------------------------------------------------------
 -spec(init(Args :: term()) ->
   {ok,
-    {SupFlags :: {supervisor:strategy(), MaxR :: non_neg_integer(), MaxT :: non_neg_integer()},
+    {SupFlags :: {supervisor:strategy(), MaxR :: pos_integer(), MaxT :: pos_integer()},
       [ChildSpec :: supervisor:child_spec()]
     }}).
 init([CityDefs]) ->
