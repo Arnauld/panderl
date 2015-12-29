@@ -10,6 +10,7 @@
 -author("Arnauld").
 
 -include_lib("eunit/include/eunit.hrl").
+-include("assert_ext.hrl").
 
 should_provide_links__test() ->
   try
@@ -84,6 +85,27 @@ should_asynchronously_be_notified_on_outbreak_test() ->
               timeout
             end,
     ?assertEqual([paris, new_york], Links)
+  after
+    city_srv:stop(london)
+  end.
+
+should_be_able_to_change_infection_level_test() ->
+  try
+    city_srv:start_link(london, [paris, new_york]),
+
+    {ok, Ref} = city_srv:change_infection_level(london, blue, 2, self()),
+
+    receive
+      {infection_level_changed, City, Ref, Disease, NewLevel} ->
+        ?assertEqual(london, City),
+        ?assertEqual(blue, Disease),
+        ?assertEqual(2, NewLevel)
+    after 1000 ->
+      ?fail(timeout)
+    end,
+    {ok, {london, infection_levels, Levels}} = city_srv:get_infection_levels(london),
+    ?assertEqual(2, proplists:get_value(blue, Levels))
+
   after
     city_srv:stop(london)
   end.

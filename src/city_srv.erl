@@ -16,6 +16,7 @@
 -export([start_link/2, stop/1]).
 -export([
   increase_infection_level/3,
+  change_infection_level/4,
   get_infection_levels/1,
   get_links/1]).
 
@@ -82,6 +83,26 @@ increase_infection_level(City, Disease, Originator)
   Ref = make_ref(),
   gen_server:cast(City, {increase_infection_level, City, Disease, Originator, Ref}),
   {ok, Ref}.
+
+%%--------------------------------------------------------------------
+%% @doc
+%% Change the infection level of the specified disease.
+%%
+%% Result of the change is then (asynchronously) send to the originator provided,
+%% referencing the returned reference.
+%%
+%% ```{infection_level_changed, City, Ref, Disease, NewLevel}'''
+%% @end
+%%--------------------------------------------------------------------
+-spec(change_infection_level(city(), disease(), infection_level(), originator()) -> {ok, Ref :: reference()}).
+change_infection_level(City, Disease, NewLevel, Originator)
+  when ?is_city(City)
+  andalso ?is_disease(Disease)
+  andalso ?is_originator(Originator) ->
+  Ref = make_ref(),
+  gen_server:cast(City, {change_infection_level, City, Disease, NewLevel, Originator, Ref}),
+  {ok, Ref}.
+
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -159,11 +180,7 @@ handle_cast({increase_infection_level, City, Disease, Originator, Ref}, State) -
   #state{name = City,
     infection_levels = Levels,
     links = Links} = State,
-  Level = case maps:find(Disease, Levels) of
-            {ok, L} -> L;
-            error -> 0
-          end,
-
+  Level = maps:get(Disease, Levels, 0),
   case Level of
     3 ->
       Originator ! {infection_level_increased, City, Ref, Disease, outbreak, Links},
@@ -176,6 +193,14 @@ handle_cast({increase_infection_level, City, Disease, Originator, Ref}, State) -
       Originator ! {infection_level_increased, City, Ref, Disease, NewLevel},
       {noreply, NewState}
   end;
+
+handle_cast({change_infection_level, City, Disease, NewLevel, Originator, Ref}, State) ->
+  #state{name = City,
+    infection_levels = Levels} = State,
+  NewLevels = maps:put(Disease, NewLevel, Levels),
+  NewState = State#state{infection_levels = NewLevels},
+  Originator ! {infection_level_changed, City, Ref, Disease, NewLevel},
+  {noreply, NewState};
 
 handle_cast(_Request, State) ->
   {noreply, State}.
