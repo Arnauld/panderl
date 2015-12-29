@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 28. déc. 2015 18:21
 %%%-------------------------------------------------------------------
--module(city_srv_test).
+-module(city_srv_tests).
 -author("Arnauld").
 
 -include_lib("eunit/include/eunit.hrl").
