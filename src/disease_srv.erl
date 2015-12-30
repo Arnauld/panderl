@@ -67,8 +67,22 @@ start_link(Disease, NbCubes)
 stop(City) when ?is_city(City) ->
   gen_server:stop(City).
 
+%%--------------------------------------------------------------------
+%% @doc
+%% Consume nb cubes of the specified disease.
+%%
+%% Result of the change is then (asynchronously) send to the originator provided,
+%% referencing the returned reference.
+%%
+%% ```{cube_consumed, Disease, Ref, NewNbCubes}
+%%    {cube_consumed, Disease, Ref, not_enough_cubes}'''
+%% @end
+%%--------------------------------------------------------------------
 -spec(consume(disease(), pos_integer(), originator()) -> {ok, Ref :: reference()}).
-consume(Disease, Amount, Originator) ->
+consume(Disease, Amount, Originator)
+  when ?is_disease(Disease)
+  andalso is_integer(Amount)
+  andalso ?is_originator(Originator) ->
   Ref = make_ref(),
   gen_server:cast(Disease, {consume, Disease, Amount, Originator, Ref}),
   {ok, Ref}.

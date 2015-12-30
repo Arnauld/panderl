@@ -44,6 +44,8 @@ should_asynchronously_be_notified_with_new_infection_level_when_it_increases_tes
       receive
         {infection_level_increased, london, Ref, Disease, NewLevel} ->
           {Disease, NewLevel}
+      after 1000 ->
+        ?fail(timeout)
       end
     end, [Ref1, Ref2, Ref3, Ref4, Ref5]),
     ?assertEqual([1, 2, 3], proplists:get_all_values(blue, Levels)),
@@ -82,7 +84,7 @@ should_asynchronously_be_notified_on_outbreak_test() ->
               {infection_level_increased, london, Ref4, blue, outbreak, RLinks} ->
                 RLinks
             after 1000 ->
-              timeout
+              ?fail(timeout)
             end,
     ?assertEqual([paris, new_york], Links)
   after
