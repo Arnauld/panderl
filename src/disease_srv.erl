@@ -54,7 +54,7 @@ start_link(Disease, NbCubes)
   when ?is_disease(Disease)
   andalso is_integer(NbCubes)
   andalso NbCubes >= 0 ->
-  gen_server:start_link({local, Disease}, ?MODULE, [Disease, NbCubes], []).
+  gen_server:start_link({local, Disease}, ?MODULE, {Disease, NbCubes}, []).
 
 
 %%--------------------------------------------------------------------
@@ -132,8 +132,8 @@ get_nb_cubes(Disease)
 %% @spec init(Args) -> {ok, State}
 %% @end
 %%--------------------------------------------------------------------
--spec(init(Args :: term()) -> {ok, State :: #state{}}).
-init([Disease, NbCubes]) ->
+-spec(init({disease(), non_neg_integer()}) -> {ok, State :: #state{}}).
+init({Disease, NbCubes}) ->
   {ok, #state{name = Disease, remaining_cubes = NbCubes}}.
 
 %%--------------------------------------------------------------------
@@ -201,10 +201,7 @@ handle_cast(_Request, State) ->
 %%                                   {stop, Reason, State}
 %% @end
 %%--------------------------------------------------------------------
--spec(handle_info(Info :: timeout() | term(), State :: #state{}) ->
-  {noreply, NewState :: #state{}} |
-  {noreply, NewState :: #state{}, timeout() | hibernate} |
-  {stop, Reason :: term(), NewState :: #state{}}).
+-spec(handle_info(Info :: timeout() | term(), State :: #state{}) -> {noreply, NewState :: #state{}}).
 handle_info(_Info, State) ->
   {noreply, State}.
 
@@ -234,7 +231,7 @@ terminate(_Reason, _State) ->
 %%--------------------------------------------------------------------
 -spec(code_change(OldVsn :: term() | {down, term()}, State :: #state{},
     Extra :: term()) ->
-  {ok, NewState :: #state{}} | {error, Reason :: term()}).
+  {ok, NewState :: #state{}}).
 code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 

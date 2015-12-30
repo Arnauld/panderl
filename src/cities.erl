@@ -32,7 +32,7 @@ city_defs_from_raw_links(Links) ->
   end, #{}, Links),
   maps:to_list(CitySet).
 
--spec(default_raw_links() -> [{city(), city()}]).
+-spec(default_raw_links() -> [{city(), city()}, ...]).
 default_raw_links() ->
   [
 % Connect all blues
