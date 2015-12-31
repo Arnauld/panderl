@@ -62,7 +62,8 @@ start_link(City, Links)
 %%--------------------------------------------------------------------
 -spec(stop(city()) -> ok).
 stop(City) when ?is_city(City) ->
-  gen_server:stop(City).
+  gen_server:stop(City),
+  ok.
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -75,14 +76,14 @@ stop(City) when ?is_city(City) ->
 %%    {infection_level_increased, City, Ref, Disease, outbreak, Links}'''
 %% @end
 %%--------------------------------------------------------------------
--spec(increase_infection_level(city(), disease(), originator()) -> {ok, Ref :: reference()}).
+-spec(increase_infection_level(city(), disease(), originator()) -> {ok, reference()}|city_not_started).
 increase_infection_level(City, Disease, Originator)
   when ?is_city(City)
   andalso ?is_disease(Disease)
   andalso ?is_originator(Originator) ->
   Ref = make_ref(),
-  gen_server:cast(City, {increase_infection_level, City, Disease, Originator, Ref}),
-  {ok, Ref}.
+  % unfortunately `gen_server:cast` silently ignore if process is not alive
+  cast_if_exists(City, {increase_infection_level, City, Disease, Originator, Ref}, Ref).
 
 %%--------------------------------------------------------------------
 %% @doc
@@ -94,14 +95,13 @@ increase_infection_level(City, Disease, Originator)
 %% ```{infection_level_changed, City, Ref, Disease, NewLevel}'''
 %% @end
 %%--------------------------------------------------------------------
--spec(change_infection_level(city(), disease(), infection_level(), originator()) -> {ok, Ref :: reference()}).
+-spec(change_infection_level(city(), disease(), infection_level(), originator()) -> {ok, reference()}|city_not_started).
 change_infection_level(City, Disease, NewLevel, Originator)
   when ?is_city(City)
   andalso ?is_disease(Disease)
   andalso ?is_originator(Originator) ->
   Ref = make_ref(),
-  gen_server:cast(City, {change_infection_level, City, Disease, NewLevel, Originator, Ref}),
-  {ok, Ref}.
+  cast_if_exists(City, {change_infection_level, City, Disease, NewLevel, Originator, Ref}, Ref).
 
 
 %%--------------------------------------------------------------------
@@ -260,4 +260,13 @@ format_status(_Opt, _StatusData) ->
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
+-spec(cast_if_exists(city(), term(), Ref :: reference()) -> {ok, Ref :: reference()}|city_not_started).
+cast_if_exists(City, Msg, Ref) ->
+  case whereis(City) of
+    undefined ->
+      city_not_started;
+    Pid when is_pid(Pid) ->
+      ok = gen_server:cast(City, Msg),
+      {ok, Ref}
+  end.
 

@@ -76,6 +76,30 @@ should_infect_and_chain_outbreak__test() ->
     stop_cities(Defs)
   end.
 
+should_fail_on_missing_city__test() ->
+  Defs0 = default_cyclic_linked_cities(),
+  Defs = proplists:delete(paris, Defs0),
+  error_logger:info_msg("Cities ~p~n", [Defs]),
+  try
+    start_cities(Defs),
+    city_srv:change_infection_level(london, blue, 3, self()),
+
+    {ok, Journal} = infestor:infect(london, blue),
+
+    ?assertEqual([
+      {propagate, london},
+      {outbreak, london},
+      {propagation_failure, paris, city_not_started},
+      {propagate, madrid},
+      {infected, madrid, 1}], Journal),
+
+    ?assertEqual(3, get_infection_level(london, blue)),
+    ?assertEqual(1, get_infection_level(madrid, blue))
+  after
+    stop_cities(Defs)
+  end.
+
+
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
